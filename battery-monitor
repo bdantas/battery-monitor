@@ -1,0 +1,80 @@
+#!/bin/sh
+
+# battery-monitor v2.0
+# Bruno "GNUser" Dantas GPLv3
+
+# user variables:
+x=1060
+y=4
+bg_color="#5f6f7f"
+
+main()
+{
+	create_string
+	while true; do 
+		calculate
+		update_string
+		sleep 10 & wait $! # put sleep in background so that script can catch signals during sleep
+	done
+}
+
+calculate()
+{
+	remaining_percent=$(cat /sys/class/power_supply/BAT0/capacity) 
+
+	rate=$(cat /proc/acpi/battery/BAT0/state | grep 'present rate' | egrep -o '[0-9]+') # e.g., 13000 (mW)
+	capacity=$(cat /proc/acpi/battery/BAT0/state | grep 'remaining capacity' | egrep -o '[0-9]+') # e.g., 26217 (mWh)
+	minutes_remaining=$(awk -v rate=$rate -v capacity=$capacity 'BEGIN {printf "%.0f", capacity/rate*60}') # e.g., 121
+	hours=$(( minutes_remaining / 60 )) # e.g., 2
+	minutes=$(( minutes_remaining % 60 )); minutes=$(printf '%02d' $minutes) # e.g., 01
+	time_remaining="${hours}:${minutes}" # e.g., 2:01
+
+	if cat /sys/class/power_supply/BAT0/status | egrep -q 'Charging|Unknown'; then
+		status="charging"
+		suffix="~"
+	else
+		status="battery"
+		suffix=""
+	fi
+
+	if [ "$remaining_percent" -ge 20 ]; then
+		color=white
+	elif [ "$remaining_percent" -ge 10 ]; then
+		color=yellow
+	else
+		color=red
+	fi
+}
+
+create_string()
+{
+	mkfifo $string_pipe
+	exec 4<>$string_pipe
+	dzen2 -fg white -bg "$bg_color" -w 40 -h 15 -x "$x" -y "$y" -p -l 1 -e 'entertitle=uncollapse;leavetitle=collapse' <&4 &
+	echo $! >$string_pid_file
+}
+
+update_string()
+{
+	echo "^tw()^fg($color)${remaining_percent}%${suffix}" >&4
+
+	if [ "$status" = "charging" ]; then
+		echo "a/c" >&4
+	else
+		echo "$time_remaining" >&4
+	fi
+}
+
+die()
+{
+	kill $(cat $string_pid_file)
+	rm -f $string_pipe $string_pid_file
+	exit
+}
+trap die INT HUP TERM
+
+# internal variables:
+string_pipe=/tmp/battery-string-pipe
+string_pid_file=/tmp/battery-string-pid
+
+main
