@@ -2,16 +2,14 @@
 Minimalistic battery monitor for GNU/Linux laptop
 
 # Purpose
-Simple shell script for GNU/Linux that runs in the background, showing remaining battery charge (as a percentage) on the desktop. Hovering over the percentage shows battery time left (in hours:minutes).
+To show a battery icon in the system tray; hovering over the icon shows remaining battery charge (both as percentage and as time remaining)
 
 # Usage
-Run `$ battery-monitor &` at boot or at any other time to launch the script
+Run `$ battery-monitor &` at boot
 
-The only adaptations you need to make (to the top of the script) are:
-1. Choose the x and y coordinates of where the percentage should appear on the screen
-2. Choose background color of the applet 
-3. Make sure the `sys` and `proc` directories are correct
-
-# Dependencies
-- GNU/Linux OS
-- **dzen2**
+# What you need
+0. GNU/Linux operating system and this script
+1. Suitable icons (provided)
+2. Suitable low battery alert sound (provided)
+3. `mktrayicon` utility somewhere in your PATH (x86_64 binary provided; for other architectures you'll need to compile from [source](https://github.com/jonhoo/mktrayicon))
+4. Check "user variables" at top of script for correctness
