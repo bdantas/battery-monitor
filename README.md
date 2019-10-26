@@ -5,7 +5,7 @@ Minimalistic battery monitor for GNU/Linux laptop
 To show a battery icon in the system tray; hovering over the icon shows remaining battery charge both as percentage and as time remaining
 
 # Usage
-Run `$ battery-monitor &` at boot
+Run `battery-monitor &` at boot
 
 # What you need
 0. GNU/Linux operating system and this script
