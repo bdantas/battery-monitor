@@ -1,82 +1,75 @@
 #!/bin/sh
 
-# battery-monitor v2.1
+# battery-monitor v7.0
 # Bruno "GNUser" Dantas GPLv3
 
 # user variables:
-x=1060
-y=4
-bg_color="#5f6f7f"
 sys_dir=/sys/class/power_supply/BAT0
 proc_dir=/proc/acpi/battery/BAT0
+sound_file=/opt/scripts/media/battery-alarm.wav
+icon_dir=/opt/scripts/media
 
 main()
 {
-	create_string
+	mktrayicon $pipe &
+
 	while true; do 
 		calculate
-		update_string
+		echo "i $icon_dir/$icon" >$pipe
+		printf "t '${remaining_percent}%%\n${remaining_time}'\n" >$pipe
+		sound_alarm_if_needed
 		sleep 10 & wait $! # put sleep in background so that script can catch signals during sleep
 	done
 }
 
 calculate()
 {
-	remaining_percent=$(cat $sys_dir/capacity) 
+	remaining_percent="$(cat $sys_dir/capacity)"
 
 	rate=$(cat $proc_dir/state | grep 'present rate' | egrep -o '[0-9]+') # e.g., 13000 (mW)
 	capacity=$(cat $proc_dir/state | grep 'remaining capacity' | egrep -o '[0-9]+') # e.g., 26217 (mWh)
 	minutes_remaining=$(awk -v rate=$rate -v capacity=$capacity 'BEGIN {printf "%.0f", capacity/rate*60}') # e.g., 121
 	hours=$(( minutes_remaining / 60 )) # e.g., 2
 	minutes=$(( minutes_remaining % 60 )); minutes=$(printf '%02d' $minutes) # e.g., 01
-	time_remaining="${hours}:${minutes}" # e.g., 2:01
+	remaining_time="${hours}:${minutes}" # e.g., 2:01
 
-	if cat $sys_dir/status | egrep -q 'Charging|Unknown'; then
-		status="charging"
-		suffix="~"
+	if cat $sys_dir/status | egrep -q 'Charging|Unknown|Full'; then
+		suffix="-charging"
+		remaining_time="a/c"
 	else
-		status="battery"
 		suffix=""
 	fi
 
-	if [ "$remaining_percent" -ge 20 ]; then
-		color=white
+	if [ "$remaining_percent" -ge 80 ]; then
+		icon="battery-full${suffix}.png"
+	elif [ "$remaining_percent" -ge 20 ]; then
+		icon="battery-good${suffix}.png"
 	elif [ "$remaining_percent" -ge 10 ]; then
-		color=yellow
+		icon="battery-low${suffix}.png"
 	else
-		color=red
+		icon="battery-caution${suffix}.png"
 	fi
 }
 
-create_string()
+sound_alarm_if_needed()
 {
-	mkfifo $string_pipe
-	exec 4<>$string_pipe
-	dzen2 -fg white -bg "$bg_color" -w 40 -h 15 -x "$x" -y "$y" -p -l 1 -e 'entertitle=uncollapse;leavetitle=collapse' <&4 &
-	echo $! >$string_pid_file
-}
+	[ -z "$memory" ] && memory="--"
 
-update_string()
-{
-	echo "^tw()^fg($color)${remaining_percent}%${suffix}" >&4
-
-	if [ "$status" = "charging" ]; then
-		echo "a/c" >&4
-	else
-		echo "$time_remaining" >&4
-	fi
+	[ "$remaining_percent" -ge 10 ] && status=g || status=b # g for good, b for bad
+	memory="${memory}${status}" # append current status to memory
+	memory=$(echo $memory | grep -o '..$') # keep only last two characters of memory
+	[ "$memory" = "gb" ] && aplay $sound_file
 }
 
 die()
 {
-	kill $(cat $string_pid_file)
-	rm -f $string_pipe $string_pid_file
+	echo "q" >$pipe
+	rm $pipe
 	exit
 }
 trap die INT HUP TERM
 
 # internal variables:
-string_pipe=/tmp/battery-string-pipe
-string_pid_file=/tmp/battery-string-pid
+pipe=/tmp/$(basename $0)-pipe; mkfifo $pipe
 
 main
