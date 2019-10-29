@@ -1,11 +1,10 @@
 #!/bin/sh
 
-# battery-monitor v7.0
+# battery-monitor v7.1
 # Bruno "GNUser" Dantas GPLv3
 
 # user variables:
 sys_dir=/sys/class/power_supply/BAT0
-proc_dir=/proc/acpi/battery/BAT0
 sound_file=/opt/scripts/media/battery-alarm.wav
 icon_dir=/opt/scripts/media
 
@@ -26,9 +25,10 @@ calculate()
 {
 	remaining_percent="$(cat $sys_dir/capacity)"
 
-	rate=$(cat $proc_dir/state | grep 'present rate' | egrep -o '[0-9]+') # e.g., 13000 (mW)
-	capacity=$(cat $proc_dir/state | grep 'remaining capacity' | egrep -o '[0-9]+') # e.g., 26217 (mWh)
-	minutes_remaining=$(awk -v rate=$rate -v capacity=$capacity 'BEGIN {printf "%.0f", capacity/rate*60}') # e.g., 121
+	usage_now=$(cat $sys_dir/power_now) # e.g., 13,000,000 (microW)
+	capacity_now=$(cat $sys_dir/energy_now) # e.g., 26,216,660 (microWh)
+	minutes_remaining=$(awk -v usage_now=$usage_now -v capacity_now=$capacity_now \
+		'BEGIN {printf "%.0f", capacity_now/usage_now*60}') # e.g., 121
 	hours=$(( minutes_remaining / 60 )) # e.g., 2
 	minutes=$(( minutes_remaining % 60 )); minutes=$(printf '%02d' $minutes) # e.g., 01
 	remaining_time="${hours}:${minutes}" # e.g., 2:01
