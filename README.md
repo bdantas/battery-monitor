@@ -12,5 +12,5 @@ Run `battery-monitor &` at boot
 1. Suitable icons (provided)
 2. Suitable low battery alert sound (provided)
 3. **mktrayicon** utility somewhere in your PATH (x86_64 binary provided; source code [here](https://github.com/jonhoo/mktrayicon))
-4. **aplay** utility (usually part of *alsa* package)
+4. **aplay** utility (usually part of *alsa-utils* package)
 5. Check "user variables" at top of script for correctness
