@@ -5,8 +5,8 @@
 
 # user variables:
 sys_dir=/sys/class/power_supply/BAT0
-sound_file=/opt/scripts/media/battery-alarm.wav
-icon_dir=/opt/scripts/media
+sound_file=/usr/share/sounds/battery-monitor/battery-alarm.wav
+icon_dir=/usr/share/icons/battery-monitor
 
 main()
 {
