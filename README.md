@@ -4,9 +4,6 @@ Minimalistic battery monitor for GNU/Linux laptop
 # Purpose
 Show battery icon in system tray; hover over icon for remaining battery percentage and time
 
-# Usage
-Run `battery-monitor &` at boot
-
 # What you need
 0. GNU/Linux operating system and this script
 1. Suitable icons (provided)
@@ -30,3 +27,7 @@ $ sudo cp *.png /usr/share/icons/battery-monitor
 $ sudo mkdir -p /usr/share/sounds/battery-monitor
 $ sudo cp battery-alarm.wav /usr/share/sounds/battery-monitor
 ```
+Note: If your operating system is not Debian-like, adjust the first step
+
+# Usage
+Run `battery-monitor &` at boot
