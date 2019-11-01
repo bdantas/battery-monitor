@@ -19,7 +19,6 @@ $ cd /tmp
 $ wget https://github.com/bdantas/battery-monitor/archive/master.zip
 $ unzip master.zip
 $ cd battery-monitor-master
-$ sudo mkdir -p /usr/local/bin
 $ sudo cp battery-monitor mktrayicon /usr/local/bin # the provided mktrayicon binary is for x86_64
 $ sudo chmod a+x /usr/local/bin/battery-monitor /usr/local/bin/mktrayicon
 $ sudo mkdir -p /usr/share/icons/battery-monitor
