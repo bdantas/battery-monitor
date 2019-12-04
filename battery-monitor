@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# battery-monitor v7.2
+# battery-monitor v7.3
 # Bruno "GNUser" Dantas GPLv3
 
 # user variables:
@@ -10,15 +10,19 @@ sound_dir=/usr/share/sounds/battery-monitor
 
 main()
 {
-	mktrayicon $pipe &
+	create_icon
 
 	while true; do 
 		calculate
-		echo "i $icon_dir/$icon" >$pipe
-		printf "t '${remaining_percent}%%\n${remaining_time}'\n" >$pipe
+		update_icon
 		make_sounds
 		sleep 10 & wait $! # put sleep in background so that script can catch signals during sleep
 	done
+}
+
+create_icon()
+{
+	mktrayicon $pipe &
 }
 
 calculate()
@@ -49,6 +53,12 @@ calculate()
 	else
 		icon="battery-caution${suffix}.png"
 	fi
+}
+
+update_icon()
+{
+		echo "i $icon_dir/$icon" >$pipe
+		printf "t '${remaining_percent}%%\n${remaining_time}'\n" >$pipe
 }
 
 make_sounds()
