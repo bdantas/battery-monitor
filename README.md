@@ -24,7 +24,7 @@ $ sudo chmod a+x /usr/local/bin/battery-monitor /usr/local/bin/mktrayicon
 $ sudo mkdir -p /usr/share/icons/battery-monitor
 $ sudo cp *.png /usr/share/icons/battery-monitor
 $ sudo mkdir -p /usr/share/sounds/battery-monitor
-$ sudo cp battery-alarm.wav /usr/share/sounds/battery-monitor
+$ sudo cp *.wav /usr/share/sounds/battery-monitor
 ```
 Note: If your operating system is not Debian-like, adjust the first step
 
