@@ -57,8 +57,8 @@ calculate()
 
 update_icon()
 {
-		echo "i $icon_dir/$icon" >$pipe
-		printf "t '${remaining_percent}%%\n${remaining_time}'\n" >$pipe
+	echo "i $icon_dir/$icon" >$pipe
+	printf "t '${remaining_percent}%%\n${remaining_time}'\n" >$pipe
 }
 
 make_sounds()
