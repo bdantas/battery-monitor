@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# battery-monitor v7.1
+# battery-monitor v7.2
 # Bruno "GNUser" Dantas GPLv3
 
 # user variables:
 sys_dir=/sys/class/power_supply/BAT0
-sound_file=/usr/share/sounds/battery-monitor/battery-alarm.wav
 icon_dir=/usr/share/icons/battery-monitor
+sound_dir=/usr/share/sounds/battery-monitor
 
 main()
 {
@@ -16,7 +16,7 @@ main()
 		calculate
 		echo "i $icon_dir/$icon" >$pipe
 		printf "t '${remaining_percent}%%\n${remaining_time}'\n" >$pipe
-		sound_alarm_if_needed
+		make_sounds
 		sleep 10 & wait $! # put sleep in background so that script can catch signals during sleep
 	done
 }
@@ -51,14 +51,23 @@ calculate()
 	fi
 }
 
-sound_alarm_if_needed()
+make_sounds()
 {
-	[ -z "$memory" ] && memory="--"
+	[ -z "$status_memory" ] && status_memory="--"
+	[ -z "$ac_memory" ] && ac_memory="--"
 
+	# make low battery sound if indicated
 	[ "$remaining_percent" -ge 10 ] && status=g || status=b # g for good, b for bad
-	memory="${memory}${status}" # append current status to memory
-	memory=$(echo $memory | grep -o '..$') # keep only last two characters of memory
-	[ "$memory" = "gb" ] && aplay $sound_file
+	status_memory="${status_memory}${status}" # append current status to memory
+	status_memory=$(echo $status_memory | grep -o '..$') # keep only last two characters of memory
+	[ "$status_memory" = "gb" ] && aplay $sound_dir/battery-alarm.wav
+
+	# make ac event sound if indicated
+	[ "$suffix" = "-charging" ] && ac=1 || ac=0
+	ac_memory="${ac_memory}${ac}"
+	ac_memory=$(echo $ac_memory | grep -o '..$')
+	[ "$ac_memory" = "01" ] && aplay $sound_dir/device-added.wav
+	[ "$ac_memory" = "10" ] && aplay $sound_dir/device-removed.wav
 }
 
 die()
