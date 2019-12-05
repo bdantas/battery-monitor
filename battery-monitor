@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# battery-monitor v7.3
+# battery-monitor v7.4
 # Bruno "GNUser" Dantas GPLv3
 
 # user variables:
@@ -22,6 +22,7 @@ main()
 
 create_icon()
 {
+	mkfifo $pipe
 	mktrayicon $pipe &
 }
 
@@ -89,6 +90,6 @@ die()
 trap die INT HUP TERM
 
 # internal variables:
-pipe=/tmp/$(basename $0)-pipe; mkfifo $pipe
+pipe=/tmp/$(basename $0)-pipe
 
 main
