@@ -15,7 +15,7 @@ Show battery icon in system tray; hover over icon for remaining battery percenta
 
 # Installation
 ```
-$ sudo apt install alsa-utils libgtk-3-0
+$ sudo apt install libgtk-3-0 alsa-utils
 $ cd /tmp
 $ wget https://github.com/bdantas/battery-monitor/archive/master.zip
 $ unzip master.zip
