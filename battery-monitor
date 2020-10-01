@@ -94,9 +94,9 @@ make_sounds()
 
 die()
 {
-	if [ "icon_method" = "mktrayicon" ]; then
+	if [ "$icon_method" = "mktrayicon" ]; then
 		echo "q" >$pipe
-	elif [ "icon_method" = "yad" ]; then
+	elif [ "$icon_method" = "yad" ]; then
 		echo "quit" >&3
 	fi
 	rm $pipe
