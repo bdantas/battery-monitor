@@ -1,12 +1,13 @@
 #!/bin/sh
 
-# battery-monitor v7.5
+# battery-monitor v8.0
 # Bruno "GNUser" Dantas GPLv3
 
 # user variables:
 sys_dir=/sys/class/power_supply/BAT0
-icon_dir=/usr/share/icons/battery-monitor
-sound_dir=/usr/share/sounds/battery-monitor
+icon_dir=/usr/local/share/icons/battery-monitor
+icon_method=yad # choose one: mktrayicon or yad
+sound_dir=/usr/local/share/sounds/battery-monitor
 
 main()
 {
@@ -23,7 +24,12 @@ main()
 create_icon()
 {
 	mkfifo $pipe
-	mktrayicon $pipe &
+	if [ "$icon_method" = "mktrayicon" ]; then
+		mktrayicon $pipe &
+	elif [ "$icon_method" = "yad" ]; then
+		exec 3<>$pipe
+		yad --notification --icon-size=24 --command=true --listen <&3 &
+	fi
 }
 
 calculate()
@@ -58,8 +64,13 @@ calculate()
 
 update_icon()
 {
-	echo "i $icon_dir/$icon" >$pipe
-	printf "t '${remaining_percent}%%\n${remaining_time}'\n" >$pipe
+	if [ "$icon_method" = "mktrayicon" ]; then
+		echo "i $icon_dir/$icon" >$pipe
+		printf "t '${remaining_percent}%%\n${remaining_time}'\n" >$pipe
+	elif [ "$icon_method" = "yad" ]; then
+		echo "icon:$icon_dir/$icon" >&3
+		echo "tooltip:${remaining_percent}%\n${remaining_time}" >&3
+	fi
 }
 
 make_sounds()
@@ -83,7 +94,11 @@ make_sounds()
 
 die()
 {
-	echo "q" >$pipe
+	if [ "icon_method" = "mktrayicon" ]; then
+		echo "q" >$pipe
+	elif [ "icon_method" = "yad" ]; then
+		echo "quit" >&3
+	fi
 	rm $pipe
 	exit
 }
